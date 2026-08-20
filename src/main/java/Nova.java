@@ -49,6 +49,9 @@ public class Nova {
 
                 System.out.println("Nice! I've marked this task as done.");
 
+            } else if (input.trim().equals("todo")) {
+                System.out.println("Please provide a description for the todo.");
+
             } else if (input.startsWith("todo ")) {
                 descriptions[taskCount] = input.substring(5);
                 types[taskCount] = "T";
@@ -102,6 +105,9 @@ public class Nova {
 
                 taskCount++;
                 System.out.println("Now you have " + taskCount + " tasks in the list.");
+
+            } else {
+                System.out.println("Sorry, I don't understand that command.");
             }
         }
 
