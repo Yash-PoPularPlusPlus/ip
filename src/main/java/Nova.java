@@ -1,11 +1,18 @@
 import java.util.Scanner;
 
 public class Nova {
+
+    private enum TaskType {
+        TODO,
+        DEADLINE,
+        EVENT
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         String[] descriptions = new String[100];
-        String[] types = new String[100];
+        TaskType[] types = new TaskType[100];
         String[] extraInfo = new String[100];
         boolean[] isDone = new boolean[100];
         int taskCount = 0;
@@ -23,17 +30,17 @@ public class Nova {
                 for (int i = 0; i < taskCount; i++) {
                     String status = isDone[i] ? "X" : " ";
 
-                    if (types[i].equals("T")) {
+                    if (types[i] == TaskType.TODO) {
                         System.out.println(
                                 (i + 1) + ".[T][" + status + "] " + descriptions[i]
                         );
-                    } else if (types[i].equals("D")) {
+                    } else if (types[i] == TaskType.DEADLINE) {
                         System.out.println(
                                 (i + 1) + ".[D][" + status + "] "
                                         + descriptions[i]
                                         + " (by: " + extraInfo[i] + ")"
                         );
-                    } else if (types[i].equals("E")) {
+                    } else if (types[i] == TaskType.EVENT) {
                         System.out.println(
                                 (i + 1) + ".[E][" + status + "] "
                                         + descriptions[i]
@@ -64,17 +71,17 @@ public class Nova {
 
                     System.out.println("Noted. I've removed this task:");
 
-                    if (types[index].equals("T")) {
+                    if (types[index] == TaskType.TODO) {
                         System.out.println(
                                 "[T][" + status + "] " + descriptions[index]
                         );
-                    } else if (types[index].equals("D")) {
+                    } else if (types[index] == TaskType.DEADLINE) {
                         System.out.println(
                                 "[D][" + status + "] "
                                         + descriptions[index]
                                         + " (by: " + extraInfo[index] + ")"
                         );
-                    } else if (types[index].equals("E")) {
+                    } else if (types[index] == TaskType.EVENT) {
                         System.out.println(
                                 "[E][" + status + "] "
                                         + descriptions[index]
@@ -100,7 +107,7 @@ public class Nova {
 
             } else if (input.startsWith("todo ")) {
                 descriptions[taskCount] = input.substring(5);
-                types[taskCount] = "T";
+                types[taskCount] = TaskType.TODO;
                 extraInfo[taskCount] = "";
                 isDone[taskCount] = false;
 
@@ -117,7 +124,7 @@ public class Nova {
                 String[] parts = content.split(" /by ", 2);
 
                 descriptions[taskCount] = parts[0];
-                types[taskCount] = "D";
+                types[taskCount] = TaskType.DEADLINE;
                 extraInfo[taskCount] = parts[1];
                 isDone[taskCount] = false;
 
@@ -143,7 +150,7 @@ public class Nova {
                 String to = toParts[1];
 
                 descriptions[taskCount] = description;
-                types[taskCount] = "E";
+                types[taskCount] = TaskType.EVENT;
                 extraInfo[taskCount] =
                         "(from: " + from + " to: " + to + ")";
                 isDone[taskCount] = false;
