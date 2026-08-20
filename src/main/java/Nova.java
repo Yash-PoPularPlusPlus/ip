@@ -45,9 +45,55 @@ public class Nova {
             } else if (input.startsWith("mark ")) {
                 int taskNumber = Integer.parseInt(input.substring(5));
                 int index = taskNumber - 1;
-                isDone[index] = true;
 
-                System.out.println("Nice! I've marked this task as done.");
+                if (index < 0 || index >= taskCount) {
+                    System.out.println("That task number does not exist.");
+                } else {
+                    isDone[index] = true;
+                    System.out.println("Nice! I've marked this task as done.");
+                }
+
+            } else if (input.startsWith("delete ")) {
+                int taskNumber = Integer.parseInt(input.substring(7));
+                int index = taskNumber - 1;
+
+                if (index < 0 || index >= taskCount) {
+                    System.out.println("That task number does not exist.");
+                } else {
+                    String status = isDone[index] ? "X" : " ";
+
+                    System.out.println("Noted. I've removed this task:");
+
+                    if (types[index].equals("T")) {
+                        System.out.println(
+                                "[T][" + status + "] " + descriptions[index]
+                        );
+                    } else if (types[index].equals("D")) {
+                        System.out.println(
+                                "[D][" + status + "] "
+                                        + descriptions[index]
+                                        + " (by: " + extraInfo[index] + ")"
+                        );
+                    } else if (types[index].equals("E")) {
+                        System.out.println(
+                                "[E][" + status + "] "
+                                        + descriptions[index]
+                                        + " " + extraInfo[index]
+                        );
+                    }
+
+                    for (int i = index; i < taskCount - 1; i++) {
+                        descriptions[i] = descriptions[i + 1];
+                        types[i] = types[i + 1];
+                        extraInfo[i] = extraInfo[i + 1];
+                        isDone[i] = isDone[i + 1];
+                    }
+
+                    taskCount--;
+                    System.out.println(
+                            "Now you have " + taskCount + " tasks in the list."
+                    );
+                }
 
             } else if (input.trim().equals("todo")) {
                 System.out.println("Please provide a description for the todo.");
@@ -62,7 +108,9 @@ public class Nova {
                 System.out.println("[T][ ] " + descriptions[taskCount]);
 
                 taskCount++;
-                System.out.println("Now you have " + taskCount + " tasks in the list.");
+                System.out.println(
+                        "Now you have " + taskCount + " tasks in the list."
+                );
 
             } else if (input.startsWith("deadline ")) {
                 String content = input.substring(9);
@@ -80,7 +128,9 @@ public class Nova {
                 );
 
                 taskCount++;
-                System.out.println("Now you have " + taskCount + " tasks in the list.");
+                System.out.println(
+                        "Now you have " + taskCount + " tasks in the list."
+                );
 
             } else if (input.startsWith("event ")) {
                 String content = input.substring(6);
@@ -94,7 +144,8 @@ public class Nova {
 
                 descriptions[taskCount] = description;
                 types[taskCount] = "E";
-                extraInfo[taskCount] = "(from: " + from + " to: " + to + ")";
+                extraInfo[taskCount] =
+                        "(from: " + from + " to: " + to + ")";
                 isDone[taskCount] = false;
 
                 System.out.println("Got it. I've added this task:");
@@ -104,7 +155,9 @@ public class Nova {
                 );
 
                 taskCount++;
-                System.out.println("Now you have " + taskCount + " tasks in the list.");
+                System.out.println(
+                        "Now you have " + taskCount + " tasks in the list."
+                );
 
             } else {
                 System.out.println("Sorry, I don't understand that command.");
