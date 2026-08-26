@@ -1,3 +1,5 @@
+package nova;
+
 import java.util.Scanner;
 
 public class Ui {
