@@ -3,12 +3,20 @@ package nova;
 import java.io.IOException;
 import java.nio.file.Path;
 
+/**
+ * Runs the Nova chatbot.
+ */
 public class Nova {
 
     private final Storage storage;
     private final TaskList tasks;
     private final Ui ui;
 
+    /**
+     * Creates a Nova instance using the specified storage file.
+     *
+     * @param filePath path to the storage file
+     */
     public Nova(String filePath) {
         ui = new Ui();
         storage = new Storage(Path.of(filePath));
@@ -25,6 +33,9 @@ public class Nova {
         tasks = loadedTasks;
     }
 
+    /**
+     * Runs Nova until the user exits.
+     */
     public void run() {
         ui.showWelcome();
 
@@ -112,6 +123,11 @@ public class Nova {
         ui.close();
     }
 
+    /**
+     * Starts Nova.
+     *
+     * @param args command-line arguments
+     */
     public static void main(String[] args) {
         new Nova("data/nova.txt").run();
     }
