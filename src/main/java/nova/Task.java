@@ -4,10 +4,13 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Represents a task stored by Nova.
+ * Represents a task managed by Nova.
  */
 public class Task {
 
+    /**
+     * Represents the supported task types.
+     */
     public enum Type {
         TODO,
         DEADLINE,
@@ -22,27 +25,26 @@ public class Task {
     private final String extraInfo;
     private final LocalDateTime deadline;
 
-    private boolean done;
+    private boolean isDone;
 
     private Task(
             Type type,
             String description,
             String extraInfo,
             LocalDateTime deadline,
-            boolean done) {
-
+            boolean isDone) {
         this.type = type;
         this.description = description;
         this.extraInfo = extraInfo;
         this.deadline = deadline;
-        this.done = done;
+        this.isDone = isDone;
     }
 
     /**
      * Creates a todo task.
      *
-     * @param description task description
-     * @return the new task
+     * @param description Task description.
+     * @return New todo task.
      */
     public static Task todo(String description) {
         return new Task(
@@ -50,82 +52,70 @@ public class Task {
                 description,
                 "",
                 null,
-                false
-        );
+                false);
     }
 
     /**
      * Creates a deadline task.
      *
-     * @param description task description
-     * @param deadline deadline date and time
-     * @return the new task
+     * @param description Task description.
+     * @param deadline Deadline date and time.
+     * @return New deadline task.
      */
     public static Task deadline(
-            String description,
-            LocalDateTime deadline) {
-
+            String description, LocalDateTime deadline) {
         return new Task(
                 Type.DEADLINE,
                 description,
                 "",
                 deadline,
-                false
-        );
+                false);
     }
 
     /**
      * Creates an event task.
      *
-     * @param description event description
-     * @param from event start
-     * @param to event end
-     * @return the new task
+     * @param description Event description.
+     * @param from Event start.
+     * @param to Event end.
+     * @return New event task.
      */
     public static Task event(
-            String description,
-            String from,
-            String to) {
-
+            String description, String from, String to) {
         return new Task(
                 Type.EVENT,
                 description,
                 "(from: " + from + " to: " + to + ")",
                 null,
-                false
-        );
+                false);
     }
 
     /**
-     * Recreates a task from its stored form.
+     * Reconstructs a task from its stored representation.
      *
-     * @param line stored task data
-     * @return the reconstructed task
+     * @param line Stored task.
+     * @return Reconstructed task.
      */
     public static Task fromStorageString(String line) {
         String[] parts = line.split("\t", -1);
 
         if (parts.length != 4) {
-            throw new IllegalArgumentException(
-                    "Invalid stored task."
-            );
+            throw new IllegalArgumentException("Invalid stored task.");
         }
 
         Type type = Type.valueOf(parts[0]);
-        boolean done = parts[1].equals("1");
+        boolean isDone = parts[1].equals("1");
         String description = parts[2];
 
         if (type == Type.DEADLINE) {
-            LocalDateTime deadline =
-                    LocalDateTime.parse(parts[3]);
+            LocalDateTime deadline = LocalDateTime.parse(parts[3]);
 
             return new Task(
                     type,
                     description,
                     "",
                     deadline,
-                    done
-            );
+                    isDone);
         }
 
         return new Task(
@@ -133,21 +123,20 @@ public class Task {
                 description,
                 parts[3],
                 null,
-                done
-        );
+                isDone);
     }
 
     /**
      * Marks this task as done.
      */
     public void markDone() {
-        done = true;
+        isDone = true;
     }
 
     /**
-     * Returns the form used to store this task.
+     * Returns the representation used to store this task.
      *
-     * @return stored representation
+     * @return Stored representation.
      */
     public String toStorageString() {
         String storedExtraInfo;
@@ -159,37 +148,33 @@ public class Task {
         }
 
         return type.name()
-                + "\t" + (done ? "1" : "0")
+                + "\t" + (isDone ? "1" : "0")
                 + "\t" + description
                 + "\t" + storedExtraInfo;
     }
 
     /**
-     * Returns the form displayed to the user.
+     * Returns the representation shown to the user.
      *
-     * @return display representation
+     * @return Display representation.
      */
     public String toDisplayString() {
-        String status = done ? "X" : " ";
+        String status = isDone ? "X" : " ";
 
         switch (type) {
             case TODO:
-                return "[T][" + status + "] "
-                        + description;
-
+                return "[T][" + status + "] " + description;
             case DEADLINE:
                 return "[D][" + status + "] "
                         + description
                         + " (by: "
                         + deadline.format(OUTPUT_DATE_FORMAT)
                         + ")";
-
             case EVENT:
                 return "[E][" + status + "] "
                         + description
                         + " "
                         + extraInfo;
-
             default:
                 return description;
         }

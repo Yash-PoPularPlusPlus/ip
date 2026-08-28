@@ -8,26 +8,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Loads and saves tasks.
+ * Handles loading and saving tasks.
  */
 public class Storage {
 
     private final Path filePath;
 
     /**
-     * Creates storage for the specified file.
+     * Creates storage using the specified file.
      *
-     * @param filePath task storage file
+     * @param filePath Task storage file.
      */
     public Storage(Path filePath) {
         this.filePath = filePath;
     }
 
     /**
-     * Loads tasks from disk.
+     * Loads tasks from the storage file.
      *
-     * @return loaded tasks
-     * @throws IOException if the file cannot be accessed
+     * @return Loaded task list.
+     * @throws IOException If the storage file cannot be accessed.
      */
     public TaskList load() throws IOException {
         createParentDirectory();
@@ -56,16 +56,15 @@ public class Storage {
     }
 
     /**
-     * Saves tasks to disk.
+     * Saves tasks to the storage file.
      *
-     * @param taskList tasks to save
-     * @throws IOException if the file cannot be written
+     * @param taskList Tasks to save.
+     * @throws IOException If the storage file cannot be written.
      */
     public void save(TaskList taskList) throws IOException {
         createParentDirectory();
 
         List<String> lines = new ArrayList<>();
-
         for (Task task : taskList.getAll()) {
             lines.add(task.toStorageString());
         }
@@ -74,13 +73,10 @@ public class Storage {
                 filePath,
                 lines,
                 StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING
-        );
+                StandardOpenOption.TRUNCATE_EXISTING);
     }
 
-    private void createParentDirectory()
-            throws IOException {
-
+    private void createParentDirectory() throws IOException {
         Path parent = filePath.getParent();
 
         if (parent != null) {

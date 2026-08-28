@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Manages Nova's list of tasks.
+ * Manages Nova's collection of tasks.
  */
 public class TaskList {
 
@@ -19,9 +19,9 @@ public class TaskList {
     }
 
     /**
-     * Creates a task list containing the given tasks.
+     * Creates a task list containing the specified tasks.
      *
-     * @param tasks initial tasks
+     * @param tasks Initial tasks.
      */
     public TaskList(List<Task> tasks) {
         this.tasks = new ArrayList<>(tasks);
@@ -30,7 +30,7 @@ public class TaskList {
     /**
      * Returns the number of tasks.
      *
-     * @return number of tasks
+     * @return Number of tasks.
      */
     public int size() {
         return tasks.size();
@@ -39,17 +39,17 @@ public class TaskList {
     /**
      * Adds a task.
      *
-     * @param task task to add
+     * @param task Task to add.
      */
     public void add(Task task) {
         tasks.add(task);
     }
 
     /**
-     * Deletes a task.
+     * Deletes the specified task.
      *
-     * @param taskNumber one-based task number
-     * @return deleted task
+     * @param taskNumber One-based task number.
+     * @return Deleted task.
      */
     public Task delete(int taskNumber) {
         int index = getIndex(taskNumber);
@@ -57,9 +57,9 @@ public class TaskList {
     }
 
     /**
-     * Marks a task as done.
+     * Marks the specified task as done.
      *
-     * @param taskNumber one-based task number
+     * @param taskNumber One-based task number.
      */
     public void markDone(int taskNumber) {
         int index = getIndex(taskNumber);
@@ -67,10 +67,10 @@ public class TaskList {
     }
 
     /**
-     * Returns a task.
+     * Returns the specified task.
      *
-     * @param taskNumber one-based task number
-     * @return requested task
+     * @param taskNumber One-based task number.
+     * @return Requested task.
      */
     public Task get(int taskNumber) {
         int index = getIndex(taskNumber);
@@ -78,9 +78,9 @@ public class TaskList {
     }
 
     /**
-     * Returns all tasks.
+     * Returns all tasks as an unmodifiable list.
      *
-     * @return unmodifiable task list
+     * @return Unmodifiable task list.
      */
     public List<Task> getAll() {
         return Collections.unmodifiableList(tasks);
@@ -91,8 +91,7 @@ public class TaskList {
 
         if (index < 0 || index >= tasks.size()) {
             throw new IllegalArgumentException(
-                    "That task number does not exist."
-            );
+                    "That task number does not exist.");
         }
 
         return index;
