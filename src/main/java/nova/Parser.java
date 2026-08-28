@@ -4,11 +4,17 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Parses user input into commands understood by Nova.
+ */
 public class Parser {
 
     private static final DateTimeFormatter INPUT_DATE_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
+    /**
+     * Represents the command types supported by Nova.
+     */
     public enum CommandType {
         BYE,
         LIST,
@@ -20,42 +26,38 @@ public class Parser {
         UNKNOWN
     }
 
-    public static ParsedCommand parse(String input) {
+    private Parser() {
+    }
 
+    /**
+     * Parses user input into a structured command.
+     *
+     * @param input User input.
+     * @return Parsed command.
+     * @throws IllegalArgumentException If the command arguments are invalid.
+     */
+    public static ParsedCommand parse(String input) {
         if (input.equals("bye")) {
             return new ParsedCommand(CommandType.BYE);
-
         } else if (input.equals("list")) {
             return new ParsedCommand(CommandType.LIST);
-
         } else if (input.startsWith("mark ")) {
             return ParsedCommand.withTaskNumber(
                     CommandType.MARK,
-                    parseTaskNumber(input.substring(5))
-            );
-
+                    parseTaskNumber(input.substring(5)));
         } else if (input.startsWith("delete ")) {
             return ParsedCommand.withTaskNumber(
                     CommandType.DELETE,
-                    parseTaskNumber(input.substring(7))
-            );
-
+                    parseTaskNumber(input.substring(7)));
         } else if (input.trim().equals("todo")) {
             throw new IllegalArgumentException(
-                    "Please provide a description for the todo."
-            );
-
+                    "Please provide a description for the todo.");
         } else if (input.startsWith("todo ")) {
-            String description = input.substring(5);
-
             return ParsedCommand.withDescription(
                     CommandType.TODO,
-                    description
-            );
-
+                    input.substring(5));
         } else if (input.startsWith("deadline ")) {
             return parseDeadline(input.substring(9));
-
         } else if (input.startsWith("event ")) {
             return parseEvent(input.substring(6));
         }
@@ -63,80 +65,59 @@ public class Parser {
         return new ParsedCommand(CommandType.UNKNOWN);
     }
 
-    private static ParsedCommand parseDeadline(
-            String content) {
-
-        String[] parts =
-                content.split(" /by ", 2);
+    private static ParsedCommand parseDeadline(String content) {
+        String[] parts = content.split(" /by ", 2);
 
         if (parts.length != 2) {
             throw new IllegalArgumentException(
-                    "Please use: deadline DESCRIPTION "
-                            + "/by yyyy-MM-dd HHmm"
-            );
+                    "Please use: deadline DESCRIPTION /by yyyy-MM-dd HHmm");
         }
 
         try {
-            LocalDateTime deadline =
-                    LocalDateTime.parse(
-                            parts[1],
-                            INPUT_DATE_FORMAT
-                    );
+            LocalDateTime deadline = LocalDateTime.parse(
+                    parts[1],
+                    INPUT_DATE_FORMAT);
 
-            return ParsedCommand.withDeadline(
-                    parts[0],
-                    deadline
-            );
-
+            return ParsedCommand.withDeadline(parts[0], deadline);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
-                    "Please enter the deadline "
-                            + "as yyyy-MM-dd HHmm."
-            );
+                    "Please enter the deadline as yyyy-MM-dd HHmm.");
         }
     }
 
-    private static ParsedCommand parseEvent(
-            String content) {
-
-        String[] fromParts =
-                content.split(" /from ", 2);
+    private static ParsedCommand parseEvent(String content) {
+        String[] fromParts = content.split(" /from ", 2);
 
         if (fromParts.length != 2) {
             throw new IllegalArgumentException(
-                    "Please provide both /from and /to."
-            );
+                    "Please provide both /from and /to.");
         }
 
-        String[] toParts =
-                fromParts[1].split(" /to ", 2);
+        String[] toParts = fromParts[1].split(" /to ", 2);
 
         if (toParts.length != 2) {
             throw new IllegalArgumentException(
-                    "Please provide both /from and /to."
-            );
+                    "Please provide both /from and /to.");
         }
 
         return ParsedCommand.withEvent(
                 fromParts[0],
                 toParts[0],
-                toParts[1]
-        );
+                toParts[1]);
     }
 
-    private static int parseTaskNumber(
-            String numberText) {
-
+    private static int parseTaskNumber(String numberText) {
         try {
             return Integer.parseInt(numberText);
-
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(
-                    "That task number does not exist."
-            );
+                    "That task number does not exist.");
         }
     }
 
+    /**
+     * Stores information extracted from a parsed command.
+     */
     public static class ParsedCommand {
 
         private final CommandType type;
@@ -146,61 +127,72 @@ public class Parser {
         private String from;
         private String to;
 
+        /**
+         * Creates a parsed command of the specified type.
+         *
+         * @param type Command type.
+         */
         public ParsedCommand(CommandType type) {
             this.type = type;
         }
 
+        /**
+         * Creates a command containing a task number.
+         *
+         * @param type Command type.
+         * @param taskNumber Task number.
+         * @return Parsed command.
+         */
         public static ParsedCommand withTaskNumber(
-                CommandType type,
-                int taskNumber) {
-
-            ParsedCommand command =
-                    new ParsedCommand(type);
-
+                CommandType type, int taskNumber) {
+            ParsedCommand command = new ParsedCommand(type);
             command.taskNumber = taskNumber;
             return command;
         }
 
+        /**
+         * Creates a command containing a description.
+         *
+         * @param type Command type.
+         * @param description Task description.
+         * @return Parsed command.
+         */
         public static ParsedCommand withDescription(
-                CommandType type,
-                String description) {
-
-            ParsedCommand command =
-                    new ParsedCommand(type);
-
+                CommandType type, String description) {
+            ParsedCommand command = new ParsedCommand(type);
             command.description = description;
             return command;
         }
 
+        /**
+         * Creates a deadline command.
+         *
+         * @param description Task description.
+         * @param deadline Deadline date and time.
+         * @return Parsed command.
+         */
         public static ParsedCommand withDeadline(
-                String description,
-                LocalDateTime deadline) {
-
-            ParsedCommand command =
-                    new ParsedCommand(
-                            CommandType.DEADLINE
-                    );
-
+                String description, LocalDateTime deadline) {
+            ParsedCommand command = new ParsedCommand(CommandType.DEADLINE);
             command.description = description;
             command.deadline = deadline;
-
             return command;
         }
 
+        /**
+         * Creates an event command.
+         *
+         * @param description Event description.
+         * @param from Event start.
+         * @param to Event end.
+         * @return Parsed command.
+         */
         public static ParsedCommand withEvent(
-                String description,
-                String from,
-                String to) {
-
-            ParsedCommand command =
-                    new ParsedCommand(
-                            CommandType.EVENT
-                    );
-
+                String description, String from, String to) {
+            ParsedCommand command = new ParsedCommand(CommandType.EVENT);
             command.description = description;
             command.from = from;
             command.to = to;
-
             return command;
         }
 
