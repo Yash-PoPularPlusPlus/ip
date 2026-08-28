@@ -1,5 +1,6 @@
 package nova;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Ui {
@@ -23,6 +24,23 @@ public class Ui {
         for (int i = 1; i <= tasks.size(); i++) {
             System.out.println(
                     i + "." + tasks.get(i).toDisplayString()
+            );
+        }
+    }
+
+    /**
+     * Displays tasks matching a find command.
+     *
+     * @param tasks matching tasks
+     */
+    public void showMatchingTasks(List<Task> tasks) {
+        System.out.println(
+                "Here are the matching tasks in your list:"
+        );
+
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println(
+                    (i + 1) + "." + tasks.get(i).toDisplayString()
             );
         }
     }

@@ -43,6 +43,24 @@ public class TaskList {
         return Collections.unmodifiableList(tasks);
     }
 
+    /**
+     * Finds tasks whose descriptions contain the given keyword.
+     *
+     * @param keyword keyword to search for
+     * @return matching tasks
+     */
+    public List<Task> find(String keyword) {
+        List<Task> matches = new ArrayList<>();
+
+        for (Task task : tasks) {
+            if (task.containsKeyword(keyword)) {
+                matches.add(task);
+            }
+        }
+
+        return matches;
+    }
+
     private int getIndex(int taskNumber) {
         int index = taskNumber - 1;
 

@@ -111,6 +111,16 @@ public class Task {
         done = true;
     }
 
+    /**
+     * Returns whether the task description contains the given keyword.
+     *
+     * @param keyword keyword to search for
+     * @return true if the description contains the keyword
+     */
+    public boolean containsKeyword(String keyword) {
+        return description.contains(keyword);
+    }
+
     public String toStorageString() {
         String storedExtraInfo;
 
