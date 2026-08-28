@@ -7,14 +7,28 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Loads and saves tasks.
+ */
 public class Storage {
 
     private final Path filePath;
 
+    /**
+     * Creates storage for the specified file.
+     *
+     * @param filePath task storage file
+     */
     public Storage(Path filePath) {
         this.filePath = filePath;
     }
 
+    /**
+     * Loads tasks from disk.
+     *
+     * @return loaded tasks
+     * @throws IOException if the file cannot be accessed
+     */
     public TaskList load() throws IOException {
         createParentDirectory();
 
@@ -41,6 +55,12 @@ public class Storage {
         return new TaskList(tasks);
     }
 
+    /**
+     * Saves tasks to disk.
+     *
+     * @param taskList tasks to save
+     * @throws IOException if the file cannot be written
+     */
     public void save(TaskList taskList) throws IOException {
         createParentDirectory();
 

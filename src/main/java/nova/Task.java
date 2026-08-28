@@ -3,6 +3,9 @@ package nova;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Represents a task stored by Nova.
+ */
 public class Task {
 
     public enum Type {
@@ -35,6 +38,12 @@ public class Task {
         this.done = done;
     }
 
+    /**
+     * Creates a todo task.
+     *
+     * @param description task description
+     * @return the new task
+     */
     public static Task todo(String description) {
         return new Task(
                 Type.TODO,
@@ -45,6 +54,13 @@ public class Task {
         );
     }
 
+    /**
+     * Creates a deadline task.
+     *
+     * @param description task description
+     * @param deadline deadline date and time
+     * @return the new task
+     */
     public static Task deadline(
             String description,
             LocalDateTime deadline) {
@@ -58,6 +74,14 @@ public class Task {
         );
     }
 
+    /**
+     * Creates an event task.
+     *
+     * @param description event description
+     * @param from event start
+     * @param to event end
+     * @return the new task
+     */
     public static Task event(
             String description,
             String from,
@@ -72,6 +96,12 @@ public class Task {
         );
     }
 
+    /**
+     * Recreates a task from its stored form.
+     *
+     * @param line stored task data
+     * @return the reconstructed task
+     */
     public static Task fromStorageString(String line) {
         String[] parts = line.split("\t", -1);
 
@@ -107,10 +137,18 @@ public class Task {
         );
     }
 
+    /**
+     * Marks this task as done.
+     */
     public void markDone() {
         done = true;
     }
 
+    /**
+     * Returns the form used to store this task.
+     *
+     * @return stored representation
+     */
     public String toStorageString() {
         String storedExtraInfo;
 
@@ -126,6 +164,11 @@ public class Task {
                 + "\t" + storedExtraInfo;
     }
 
+    /**
+     * Returns the form displayed to the user.
+     *
+     * @return display representation
+     */
     public String toDisplayString() {
         String status = done ? "X" : " ";
 
