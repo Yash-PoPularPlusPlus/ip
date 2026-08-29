@@ -23,6 +23,7 @@ public class Parser {
         TODO,
         DEADLINE,
         EVENT,
+        FIND,
         UNKNOWN
     }
 
@@ -60,6 +61,13 @@ public class Parser {
             return parseDeadline(input.substring(9));
         } else if (input.startsWith("event ")) {
             return parseEvent(input.substring(6));
+        } else if (input.trim().equals("find")) {
+            throw new IllegalArgumentException(
+                    "Please provide a keyword to find.");
+        } else if (input.startsWith("find ")) {
+            return ParsedCommand.withDescription(
+                    CommandType.FIND,
+                    input.substring(5));
         }
 
         return new ParsedCommand(CommandType.UNKNOWN);

@@ -2,6 +2,7 @@ package nova;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 
 /**
  * Runs the Nova chatbot.
@@ -85,6 +86,10 @@ public class Nova {
                         tasks.add(event);
                         storage.save(tasks);
                         ui.showAddedTask(event, tasks.size());
+                        break;
+                    case FIND:
+                        List<Task> matches = tasks.find(command.getDescription());
+                        ui.showMatchingTasks(matches);
                         break;
                     case UNKNOWN:
                         ui.showError("Sorry, I don't understand that command.");
