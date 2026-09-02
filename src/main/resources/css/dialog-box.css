@@ -1,0 +1,15 @@
+.dialog-label {
+    -fx-background-radius: 12px;
+    -fx-font-size: 14px;
+    -fx-padding: 10px 12px;
+}
+
+.user-dialog {
+    -fx-background-color: #315f9f;
+    -fx-text-fill: white;
+}
+
+.nova-dialog {
+    -fx-background-color: #e2e7ef;
+    -fx-text-fill: #202733;
+}
