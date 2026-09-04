@@ -54,15 +54,9 @@ public class TaskListTest {
 
         tasks.add(Task.todo("read book"));
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> tasks.delete(0)
-        );
+        assertThrows(IllegalArgumentException.class, () -> tasks.delete(0));
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> tasks.delete(2)
-        );
+        assertThrows(IllegalArgumentException.class, () -> tasks.delete(2));
     }
 
     @Test
@@ -85,19 +79,13 @@ public class TaskListTest {
 
         tasks.add(Task.todo("read book"));
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> tasks.markDone(2)
-        );
+        assertThrows(IllegalArgumentException.class, () -> tasks.markDone(2));
     }
 
     @Test
     public void get_invalidTaskNumber_throwsException() {
         TaskList tasks = new TaskList();
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> tasks.get(1)
-        );
+        assertThrows(IllegalArgumentException.class, () -> tasks.get(1));
     }
 }

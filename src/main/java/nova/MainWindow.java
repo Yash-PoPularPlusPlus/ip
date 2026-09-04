@@ -21,6 +21,9 @@ public class MainWindow {
     @FXML
     private TextField userInput;
 
+    /**
+     * Initializes automatic scrolling for the conversation area.
+     */
     @FXML
     public void initialize() {
         dialogContainer.heightProperty().addListener(
