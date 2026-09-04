@@ -100,28 +100,17 @@ public class ParserTest {
 
     @Test
     public void parse_invalidDeadline_throwsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Parser.parse(
-                        "deadline return book /by tomorrow"
-                )
-        );
+        assertThrows(IllegalArgumentException.class, () -> Parser.parse("deadline return book /by tomorrow"));
     }
 
     @Test
     public void parse_missingTodoDescription_throwsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Parser.parse("todo")
-        );
+        assertThrows(IllegalArgumentException.class, () -> Parser.parse("todo"));
     }
 
     @Test
     public void parse_invalidTaskNumber_throwsException() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> Parser.parse("delete abc")
-        );
+        assertThrows(IllegalArgumentException.class, () -> Parser.parse("delete abc"));
     }
 
     @Test
