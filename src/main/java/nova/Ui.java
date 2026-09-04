@@ -32,8 +32,9 @@ public class Ui {
      * @return Welcome message.
      */
     public static String formatWelcomeMessage() {
-        return "Hello! I'm Nova." + System.lineSeparator()
-                + "What can I do for you?";
+        return joinLines(
+                "Hello! I'm Nova.",
+                "What can I do for you?");
     }
 
     /**
@@ -82,11 +83,10 @@ public class Ui {
      * @return Task-added confirmation.
      */
     public static String formatAddedTask(Task task, int taskCount) {
-        return "Got it. I've added this task:"
-                + System.lineSeparator()
-                + task.toDisplayString()
-                + System.lineSeparator()
-                + "Now you have " + taskCount + " tasks in the list.";
+        return joinLines(
+                "Got it. I've added this task:",
+                task.toDisplayString(),
+                "Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
@@ -97,11 +97,10 @@ public class Ui {
      * @return Task-deleted confirmation.
      */
     public static String formatDeletedTask(Task task, int taskCount) {
-        return "Noted. I've removed this task:"
-                + System.lineSeparator()
-                + task.toDisplayString()
-                + System.lineSeparator()
-                + "Now you have " + taskCount + " tasks in the list.";
+        return joinLines(
+                "Noted. I've removed this task:",
+                task.toDisplayString(),
+                "Now you have " + taskCount + " tasks in the list.");
     }
 
     /**
@@ -131,6 +130,10 @@ public class Ui {
      */
     public static String formatByeMessage() {
         return "Bye. Hope to see you again soon!";
+    }
+
+    private static String joinLines(String... lines) {
+        return String.join(System.lineSeparator(), lines);
     }
 
     /**
