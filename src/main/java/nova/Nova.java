@@ -104,25 +104,16 @@ public class Nova {
                 storage.save(tasks);
                 return Ui.formatDeletedTask(removedTask, tasks.size());
             case TODO:
-                Task todo = Task.todo(command.getDescription());
-                tasks.add(todo);
-                storage.save(tasks);
-                return Ui.formatAddedTask(todo, tasks.size());
+                return addTask(Task.todo(command.getDescription()));
             case DEADLINE:
-                Task deadline = Task.deadline(
+                return addTask(Task.deadline(
                         command.getDescription(),
-                        command.getDeadline());
-                tasks.add(deadline);
-                storage.save(tasks);
-                return Ui.formatAddedTask(deadline, tasks.size());
+                        command.getDeadline()));
             case EVENT:
-                Task event = Task.event(
+                return addTask(Task.event(
                         command.getDescription(),
                         command.getFrom(),
-                        command.getTo());
-                tasks.add(event);
-                storage.save(tasks);
-                return Ui.formatAddedTask(event, tasks.size());
+                        command.getTo()));
             case FIND:
                 List<Task> matches = tasks.find(command.getDescription());
                 return Ui.formatMatchingTasks(matches);
@@ -131,6 +122,19 @@ public class Nova {
             default:
                 return "";
         }
+    }
+
+    /**
+     * Adds and saves a task before returning its confirmation message.
+     *
+     * @param task Task to add.
+     * @return Task-added confirmation.
+     * @throws IOException If the updated task list cannot be saved.
+     */
+    private String addTask(Task task) throws IOException {
+        tasks.add(task);
+        storage.save(tasks);
+        return Ui.formatAddedTask(task, tasks.size());
     }
 
     /**

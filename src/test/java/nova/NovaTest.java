@@ -3,7 +3,10 @@ package nova;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -12,6 +15,46 @@ public class NovaTest {
 
     @TempDir
     private Path tempDirectory;
+
+    @Test
+    public void getResponse_addEachTaskType_preservesConfirmationAndStorage() throws IOException {
+        Path storagePath = tempDirectory.resolve("nova.txt");
+        Nova nova = new Nova(storagePath.toString());
+        String[] commands = {
+            "todo read book",
+            "deadline return book /by 2026-09-10 1800",
+            "event meeting /from 2pm /to 4pm"
+        };
+        String[] displays = {
+            "[T][ ] read book",
+            Task.deadline("return book", LocalDateTime.of(2026, 9, 10, 18, 0)).toDisplayString(),
+            "[E][ ] meeting (from: 2pm to: 4pm)"
+        };
+
+        for (int i = 0; i < commands.length; i++) {
+            int taskCount = i + 1;
+            String expected = String.join(System.lineSeparator(),
+                    "Got it. I've added this task:", displays[i],
+                    "Now you have " + taskCount + " tasks in the list.");
+            assertEquals(expected, nova.getResponse(commands[i]));
+            assertEquals(taskCount, Files.readAllLines(storagePath).size());
+            Nova reloadedNova = new Nova(storagePath.toString());
+            assertEquals(nova.getResponse("list"), reloadedNova.getResponse("list"));
+        }
+    }
+
+    @Test
+    public void getResponse_addTaskWhenStorageUnavailable_returnsSaveError() throws IOException {
+        Path blockedParent = tempDirectory.resolve("blocked");
+        Files.writeString(blockedParent, "This file cannot be a storage directory.");
+        Nova nova = new Nova(blockedParent.resolve("nova.txt").toString());
+
+        assertEquals("Unable to save tasks.", nova.getResponse("todo read book"));
+        assertEquals("Unable to save tasks.",
+                nova.getResponse("deadline return book /by 2026-09-10 1800"));
+        assertEquals("Unable to save tasks.",
+                nova.getResponse("event meeting /from 2pm /to 4pm"));
+    }
 
     @Test
     public void getResponse_supportedCommands_returnsExpectedResponses() {
