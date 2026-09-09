@@ -3,6 +3,7 @@ package nova;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Manages Nova's collection of tasks.
@@ -93,15 +94,9 @@ public class TaskList {
      * @return Matching tasks.
      */
     public List<Task> find(String keyword) {
-        List<Task> matches = new ArrayList<>();
-
-        for (Task task : tasks) {
-            if (task.containsKeyword(keyword)) {
-                matches.add(task);
-            }
-        }
-
-        return matches;
+        return tasks.stream()
+                .filter(task -> task.containsKeyword(keyword))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     private int getIndex(int taskNumber) {
