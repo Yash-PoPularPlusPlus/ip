@@ -4,9 +4,53 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 public class TaskListTest {
+
+    @Test
+    public void find_partialKeyword_preservesOrderAndCaseSensitivity() {
+        Task firstMatch = Task.todo("read notebook");
+        Task differentCase = Task.todo("Book a room");
+        Task unrelated = Task.todo("write code");
+        Task lastMatch = Task.todo("return book");
+        TaskList tasks = new TaskList(List.of(firstMatch, differentCase, unrelated, lastMatch));
+
+        assertEquals(List.of(firstMatch, lastMatch), tasks.find("book"));
+        assertEquals(List.of(differentCase), tasks.find("Book"));
+    }
+
+    @Test
+    public void find_noMatches_returnsEmptyList() {
+        TaskList tasks = new TaskList();
+        assertEquals(List.of(), tasks.find("book"));
+
+        tasks.add(Task.todo("write code"));
+        assertEquals(List.of(), tasks.find("book"));
+    }
+
+    @Test
+    public void find_emptyKeyword_returnsAllTasksIncludingDuplicates() {
+        Task task = Task.todo("read book");
+        TaskList tasks = new TaskList(List.of(task, task));
+
+        assertEquals(List.of(task, task), tasks.find(""));
+    }
+
+    @Test
+    public void find_modifyResults_doesNotChangeTaskList() {
+        Task task = Task.todo("read book");
+        TaskList tasks = new TaskList(List.of(task));
+
+        List<Task> matches = tasks.find("book");
+        matches.clear();
+        matches.add(Task.todo("another book"));
+
+        assertEquals(List.of(task), tasks.getAll());
+        assertEquals(List.of(task), tasks.find("book"));
+    }
 
     @Test
     public void add_validTask_increasesSize() {
