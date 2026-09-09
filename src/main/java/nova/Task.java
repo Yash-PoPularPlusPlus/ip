@@ -33,6 +33,12 @@ public class Task {
             String extraInfo,
             LocalDateTime deadline,
             boolean isDone) {
+        assert type != null : "Task type must be present";
+        assert description != null : "Task description must be present";
+        assert extraInfo != null : "Task extra information must be present";
+        assert (type == Type.DEADLINE) == (deadline != null)
+                : "Only deadline tasks must have a deadline";
+
         this.type = type;
         this.description = description;
         this.extraInfo = extraInfo;
