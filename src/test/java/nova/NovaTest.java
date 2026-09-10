@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -15,6 +16,49 @@ public class NovaTest {
 
     @TempDir
     private Path tempDirectory;
+
+    @Test
+    public void getResponse_update_preservesStoredDetailsAndSearch() throws IOException {
+        Path storagePath = tempDirectory.resolve("nova.txt");
+        String original = "DEADLINE\t1\toriginal\t2026-09-10T18:00";
+        Files.writeString(storagePath, original + System.lineSeparator());
+        Nova nova = new Nova(storagePath.toString());
+
+        String response = nova.getResponse("update 1 revised homework");
+        String expectedStored = original.replace("original", "revised homework");
+        assertEquals(String.join(System.lineSeparator(), "Got it. I've updated this task:",
+                Task.fromStorageString(expectedStored).toDisplayString()), response);
+        assertEquals(List.of(expectedStored), Files.readAllLines(storagePath));
+        Nova reloaded = new Nova(storagePath.toString());
+        assertEquals(nova.getResponse("list"), reloaded.getResponse("list"));
+        assertTrue(reloaded.getResponse("find homework").contains("revised homework"));
+        assertEquals("Here are the matching tasks in your list:", reloaded.getResponse("find original"));
+    }
+
+    @Test
+    public void getResponse_invalidUpdate_preservesMemoryAndStorage() throws IOException {
+        Path storagePath = tempDirectory.resolve("nova.txt");
+        Nova nova = new Nova(storagePath.toString());
+        nova.getResponse("todo original");
+        String saved = Files.readString(storagePath);
+
+        assertEquals("Please use: update NUMBER DESCRIPTION", nova.getResponse("update 1"));
+        assertEquals("That task number does not exist.", nova.getResponse("update 2 revised"));
+        assertEquals("The description cannot contain tabs or line breaks.",
+                nova.getResponse("update 1 bad\tdescription"));
+        assertEquals("1.[T][ ] original", nova.getResponse("list"));
+        assertEquals(saved, Files.readString(storagePath));
+    }
+
+    @Test
+    public void getResponse_updateWhenStorageUnavailable_returnsSaveError() throws IOException {
+        Path blockedParent = tempDirectory.resolve("blocked");
+        Files.writeString(blockedParent, "Not a directory");
+        Nova nova = new Nova(blockedParent.resolve("nova.txt").toString());
+        nova.getResponse("todo original");
+
+        assertEquals("Unable to save tasks.", nova.getResponse("update 1 revised"));
+    }
 
     @Test
     public void getResponse_addEachTaskType_preservesConfirmationAndStorage() throws IOException {

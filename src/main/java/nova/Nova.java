@@ -105,6 +105,10 @@ public class Nova {
                 return Ui.formatDeletedTask(removedTask, tasks.size());
             case TODO:
                 return addTask(Task.todo(command.getDescription()));
+            case UPDATE:
+                Task updatedTask = tasks.update(command.getTaskNumber(), command.getDescription());
+                storage.save(tasks);
+                return Ui.formatUpdatedTask(updatedTask);
             case DEADLINE:
                 return addTask(Task.deadline(
                         command.getDescription(),
