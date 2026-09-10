@@ -20,6 +20,7 @@ public class Parser {
         LIST,
         MARK,
         DELETE,
+        UPDATE,
         TODO,
         DEADLINE,
         EVENT,
@@ -50,6 +51,10 @@ public class Parser {
             return ParsedCommand.withTaskNumber(
                     CommandType.DELETE,
                     parseTaskNumber(input.substring(7)));
+        } else if (input.trim().equals("update")) {
+            throw new IllegalArgumentException("Please use: update NUMBER DESCRIPTION");
+        } else if (input.startsWith("update ")) {
+            return parseUpdate(input.substring(7));
         } else if (input.trim().equals("todo")) {
             throw new IllegalArgumentException(
                     "Please provide a description for the todo.");
@@ -71,6 +76,14 @@ public class Parser {
         }
 
         return new ParsedCommand(CommandType.UNKNOWN);
+    }
+
+    private static ParsedCommand parseUpdate(String content) {
+        String[] parts = content.strip().split(" +", 2);
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Please use: update NUMBER DESCRIPTION");
+        }
+        return ParsedCommand.withUpdate(parseTaskNumber(parts[0]), parts[1]);
     }
 
     private static ParsedCommand parseDeadline(String content) {
@@ -201,6 +214,20 @@ public class Parser {
             command.description = description;
             command.from = from;
             command.to = to;
+            return command;
+        }
+
+        /**
+         * Creates a command to update a task description.
+         *
+         * @param taskNumber One-based task number.
+         * @param description Replacement description.
+         * @return Parsed update command.
+         */
+        public static ParsedCommand withUpdate(int taskNumber, String description) {
+            ParsedCommand command = new ParsedCommand(CommandType.UPDATE);
+            command.taskNumber = taskNumber;
+            command.description = description;
             return command;
         }
 

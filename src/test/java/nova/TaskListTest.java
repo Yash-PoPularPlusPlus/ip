@@ -11,6 +11,42 @@ import org.junit.jupiter.api.Test;
 public class TaskListTest {
 
     @Test
+    public void update_validDescription_preservesOtherTaskFields() {
+        String[] storedTasks = {
+            "TODO\t0\toriginal\t",
+            "TODO\t1\toriginal\t",
+            "DEADLINE\t0\toriginal\t2026-09-10T18:00",
+            "DEADLINE\t1\toriginal\t2026-09-10T18:00",
+            "EVENT\t0\toriginal\t(from: 2pm to: 4pm)",
+            "EVENT\t1\toriginal\t(from: 2pm to: 4pm)"
+        };
+        for (String stored : storedTasks) {
+            Task task = Task.fromStorageString(stored);
+            Task neighbour = Task.todo("unchanged");
+            TaskList tasks = new TaskList(List.of(neighbour, task));
+
+            assertSame(task, tasks.update(2, "  revised  description  "));
+            assertEquals(stored.replace("original", "revised  description"), task.toStorageString());
+            assertEquals(List.of(neighbour, task), tasks.getAll());
+            assertEquals("TODO\t0\tunchanged\t", neighbour.toStorageString());
+        }
+    }
+
+    @Test
+    public void update_invalidArguments_leavesTaskUnchanged() {
+        Task task = Task.todo("original");
+        TaskList tasks = new TaskList(List.of(task));
+        for (int number : new int[] {0, -1, 2, Integer.MIN_VALUE, Integer.MAX_VALUE}) {
+            assertThrows(IllegalArgumentException.class, () -> tasks.update(number, "revised"));
+        }
+        for (String description : new String[] {null, "", "   ", "a\tb", "a\nb", "a\rb"}) {
+            assertThrows(IllegalArgumentException.class, () -> tasks.update(1, description));
+        }
+        assertEquals("TODO\t0\toriginal\t", task.toStorageString());
+        assertEquals(1, tasks.size());
+    }
+
+    @Test
     public void find_partialKeyword_preservesOrderAndCaseSensitivity() {
         Task firstMatch = Task.todo("read notebook");
         Task differentCase = Task.todo("Book a room");

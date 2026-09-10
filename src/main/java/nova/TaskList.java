@@ -79,6 +79,20 @@ public class TaskList {
     }
 
     /**
+     * Updates the specified task without changing its position in the list.
+     *
+     * @param taskNumber One-based task number.
+     * @param description Replacement description.
+     * @return Updated task.
+     * @throws IllegalArgumentException If the task number or description is invalid.
+     */
+    public Task update(int taskNumber, String description) {
+        Task task = get(taskNumber);
+        task.updateDescription(description);
+        return task;
+    }
+
+    /**
      * Returns all tasks as an unmodifiable list.
      *
      * @return Unmodifiable task list.

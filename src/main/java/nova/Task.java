@@ -21,7 +21,7 @@ public class Task {
             DateTimeFormatter.ofPattern("MMM d yyyy h:mma");
 
     private final Type type;
-    private final String description;
+    private String description;
     private final String extraInfo;
     private final LocalDateTime deadline;
 
@@ -137,6 +137,22 @@ public class Task {
      */
     public void markDone() {
         isDone = true;
+    }
+
+    /**
+     * Updates the description while preserving all other task details.
+     *
+     * @param description Replacement description.
+     * @throws IllegalArgumentException If the description is blank or contains storage delimiters.
+     */
+    public void updateDescription(String description) {
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("Please provide a description for the update.");
+        }
+        if (description.contains("\t") || description.contains("\n") || description.contains("\r")) {
+            throw new IllegalArgumentException("The description cannot contain tabs or line breaks.");
+        }
+        this.description = description.strip();
     }
 
     /**

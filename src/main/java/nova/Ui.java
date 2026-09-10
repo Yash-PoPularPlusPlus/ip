@@ -113,6 +113,16 @@ public class Ui {
     }
 
     /**
+     * Formats confirmation that a task was updated.
+     *
+     * @param task Updated task.
+     * @return Task-updated confirmation.
+     */
+    public static String formatUpdatedTask(Task task) {
+        return joinLines("Got it. I've updated this task:", task.toDisplayString());
+    }
+
+    /**
      * Displays a response in the console.
      *
      * @param response Response to display.

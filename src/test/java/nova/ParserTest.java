@@ -10,6 +10,33 @@ import org.junit.jupiter.api.Test;
 public class ParserTest {
 
     @Test
+    public void parse_updateCommand_parsesNumberAndDescription() {
+        Parser.ParsedCommand command = Parser.parse("update  2  revised  homework /by tomorrow  ");
+
+        assertEquals(Parser.CommandType.UPDATE, command.getType());
+        assertEquals(2, command.getTaskNumber());
+        assertEquals("revised  homework /by tomorrow", command.getDescription());
+    }
+
+    @Test
+    public void parse_incompleteUpdate_returnsUsageError() {
+        for (String input : new String[] {"update", "update ", "update 1", "update 1   "}) {
+            IllegalArgumentException error = assertThrows(
+                    IllegalArgumentException.class, () -> Parser.parse(input));
+            assertEquals("Please use: update NUMBER DESCRIPTION", error.getMessage());
+        }
+    }
+
+    @Test
+    public void parse_updateInvalidNumber_returnsNumberError() {
+        for (String number : new String[] {"abc", "1.5", "2147483648"}) {
+            IllegalArgumentException error = assertThrows(
+                    IllegalArgumentException.class, () -> Parser.parse("update " + number + " revised"));
+            assertEquals("That task number does not exist.", error.getMessage());
+        }
+    }
+
+    @Test
     public void parse_todoCommand_parsesDescription() {
         Parser.ParsedCommand command =
                 Parser.parse("todo read book");
