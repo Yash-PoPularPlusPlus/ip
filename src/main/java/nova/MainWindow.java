@@ -44,11 +44,14 @@ public class MainWindow {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText();
-        String response = nova.getResponse(input);
+        Nova.Response response = nova.getResponseResult(input);
+        DialogBox responseDialog = response.isError()
+                ? DialogBox.getErrorDialog(response.message())
+                : DialogBox.getNovaDialog(response.message());
 
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input),
-                DialogBox.getNovaDialog(response));
+                responseDialog);
         userInput.clear();
     }
 }

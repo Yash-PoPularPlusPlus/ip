@@ -1,6 +1,7 @@
 package nova;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -121,6 +122,22 @@ public class NovaTest {
                 "Sorry, I don't understand that command.",
                 nova.getResponse("invalid")
         );
+    }
+
+    @Test
+    public void getResponseResult_validAndInvalidCommands_identifiesErrors() {
+        Nova nova = new Nova(tempDirectory.resolve("nova.txt").toString());
+
+        Nova.Response validResponse = nova.getResponseResult("todo read book");
+        Nova.Response invalidResponse = nova.getResponseResult("todo");
+        Nova.Response unknownResponse = nova.getResponseResult("invalid");
+
+        assertFalse(validResponse.isError());
+        assertTrue(invalidResponse.isError());
+        assertTrue(unknownResponse.isError());
+        assertTrue(validResponse.message().contains("read book"));
+        assertEquals("Please provide a description for the todo.", invalidResponse.message());
+        assertEquals("Sorry, I don't understand that command.", unknownResponse.message());
     }
 
     @Test

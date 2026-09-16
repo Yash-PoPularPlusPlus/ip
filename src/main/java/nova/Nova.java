@@ -9,6 +9,15 @@ import java.util.List;
  */
 public class Nova {
 
+    /**
+     * Contains Nova's response text and whether it represents an error.
+     *
+     * @param message Response text.
+     * @param isError Whether the response represents an error.
+     */
+    public record Response(String message, boolean isError) {
+    }
+
     private final Storage storage;
     private final TaskList tasks;
     private final String loadingError;
@@ -71,13 +80,26 @@ public class Nova {
      * @return Nova's response.
      */
     public String getResponse(String input) {
+        return getResponseResult(input).message();
+    }
+
+    /**
+     * Processes one user command and returns its text and error status.
+     *
+     * @param input User command.
+     * @return Nova's response and whether it represents an error.
+     */
+    public Response getResponseResult(String input) {
         try {
             Parser.ParsedCommand command = Parser.parse(input);
-            return executeCommand(command);
+            if (command.getType() == Parser.CommandType.UNKNOWN) {
+                return new Response("Sorry, I don't understand that command.", true);
+            }
+            return new Response(executeCommand(command), false);
         } catch (IllegalArgumentException e) {
-            return e.getMessage();
+            return new Response(e.getMessage(), true);
         } catch (IOException e) {
-            return "Unable to save tasks.";
+            return new Response("Unable to save tasks.", true);
         }
     }
 
