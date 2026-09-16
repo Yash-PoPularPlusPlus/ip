@@ -28,6 +28,7 @@ public class DialogBox extends HBox {
         }
 
         dialog.setText(text);
+        dialog.maxWidthProperty().bind(widthProperty().multiply(0.78));
     }
 
     /**
@@ -53,6 +54,18 @@ public class DialogBox extends HBox {
         DialogBox dialogBox = new DialogBox(text);
         dialogBox.setAlignment(Pos.TOP_LEFT);
         dialogBox.dialog.getStyleClass().add("nova-dialog");
+        return dialogBox;
+    }
+
+    /**
+     * Creates a left-aligned Nova error message.
+     *
+     * @param text Error text.
+     * @return Error dialog box.
+     */
+    public static DialogBox getErrorDialog(String text) {
+        DialogBox dialogBox = getNovaDialog(text);
+        dialogBox.dialog.getStyleClass().add("error-dialog");
         return dialogBox;
     }
 }
