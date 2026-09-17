@@ -55,7 +55,7 @@ public class Task {
     public static Task todo(String description) {
         return new Task(
                 Type.TODO,
-                description,
+                validateDescription(description),
                 "",
                 null,
                 false);
@@ -72,9 +72,9 @@ public class Task {
             String description, LocalDateTime deadline) {
         return new Task(
                 Type.DEADLINE,
-                description,
+                validateDescription(description),
                 "",
-                deadline,
+                validateDeadline(deadline),
                 false);
     }
 
@@ -90,8 +90,9 @@ public class Task {
             String description, String from, String to) {
         return new Task(
                 Type.EVENT,
-                description,
-                "(from: " + from + " to: " + to + ")",
+                validateDescription(description),
+                "(from: " + validateEventTime(from)
+                        + " to: " + validateEventTime(to) + ")",
                 null,
                 false);
     }
@@ -110,6 +111,10 @@ public class Task {
         }
 
         Type type = Type.valueOf(parts[0]);
+        if (!parts[1].equals("0") && !parts[1].equals("1")) {
+            throw new IllegalArgumentException("Invalid stored task status.");
+        }
+
         boolean isDone = parts[1].equals("1");
         String description = parts[2];
 
@@ -118,18 +123,20 @@ public class Task {
 
             return new Task(
                     type,
-                    description,
+                    validateDescription(description),
                     "",
                     deadline,
                     isDone);
         }
 
-        return new Task(
-                type,
-                description,
-                parts[3],
-                null,
-                isDone);
+        if (type == Type.TODO && !parts[3].isEmpty()) {
+            throw new IllegalArgumentException("Invalid stored todo.");
+        }
+        if (type == Type.EVENT && parts[3].isBlank()) {
+            throw new IllegalArgumentException("Invalid stored event.");
+        }
+
+        return new Task(type, validateDescription(description), parts[3], null, isDone);
     }
 
     /**
@@ -147,10 +154,14 @@ public class Task {
      */
     public void updateDescription(String description) {
         if (description == null || description.isBlank()) {
-            throw new IllegalArgumentException("Please provide a description for the update.");
+            throw new IllegalArgumentException(
+                    "Please provide a description for the update.");
         }
-        if (description.contains("\t") || description.contains("\n") || description.contains("\r")) {
-            throw new IllegalArgumentException("The description cannot contain tabs or line breaks.");
+        if (description.contains("\t")
+                || description.contains("\n")
+                || description.contains("\r")) {
+            throw new IllegalArgumentException(
+                    "The description cannot contain tabs or line breaks.");
         }
         this.description = description.strip();
     }
@@ -210,5 +221,37 @@ public class Task {
             default:
                 return description;
         }
+    }
+
+    private static String validateDescription(String description) {
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("Please provide a task description.");
+        }
+        if (description.contains("\t")
+                || description.contains("\n")
+                || description.contains("\r")) {
+            throw new IllegalArgumentException(
+                    "Descriptions cannot contain tabs or line breaks.");
+        }
+        return description.strip();
+    }
+
+    private static LocalDateTime validateDeadline(LocalDateTime deadline) {
+        if (deadline == null) {
+            throw new IllegalArgumentException("Please provide a deadline date and time.");
+        }
+        return deadline;
+    }
+
+    private static String validateEventTime(String eventTime) {
+        if (eventTime == null || eventTime.isBlank()) {
+            throw new IllegalArgumentException("Please provide both /from and /to.");
+        }
+        if (eventTime.contains("\t")
+                || eventTime.contains("\n")
+                || eventTime.contains("\r")) {
+            throw new IllegalArgumentException("Event times must be on one line.");
+        }
+        return eventTime.strip();
     }
 }

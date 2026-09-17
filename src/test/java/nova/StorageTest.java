@@ -1,6 +1,7 @@
 package nova;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -67,6 +68,18 @@ public class StorageTest {
         assertEquals("TODO\t0\tread book\t", tasks.get(1).toStorageString());
         assertEquals("EVENT\t1\tconsultation\t(from: 2pm to: 4pm)",
                 tasks.get(2).toStorageString());
+        assertTrue(storage.hasCorruptedEntries());
+    }
+
+    @Test
+    public void load_validEntries_reportsNoCorruption() throws IOException {
+        Path storagePath = tempDirectory.resolve("nova.txt");
+        Files.writeString(storagePath, "TODO\t0\tread book\t");
+        Storage storage = new Storage(storagePath);
+
+        storage.load();
+
+        assertFalse(storage.hasCorruptedEntries());
     }
 
     @Test

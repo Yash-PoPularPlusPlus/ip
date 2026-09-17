@@ -50,6 +50,9 @@ public class TaskTest {
         String[] invalidTasks = {
             "",
             "TODO\t0\tmissing-extra-info",
+            "TODO\t2\tinvalid status\t",
+            "TODO\t0\tunexpected extra info\textra",
+            "TODO\t0\t\t",
             "REMINDER\t0\tread book\t",
             "DEADLINE\t0\treturn book\ttomorrow"
         };
@@ -67,6 +70,14 @@ public class TaskTest {
 
         assertEquals("[T][X] read book", task.toDisplayString());
         assertEquals("TODO\t1\tread book\t", task.toStorageString());
+    }
+
+    @Test
+    public void factoryMethods_invalidText_throwsException() {
+        assertThrows(IllegalArgumentException.class, () -> Task.todo("  "));
+        assertThrows(IllegalArgumentException.class, () -> Task.todo("first\nsecond"));
+        assertThrows(IllegalArgumentException.class, () -> Task.deadline("return book", null));
+        assertThrows(IllegalArgumentException.class, () -> Task.event("consultation", "", "4pm"));
     }
 
     @Test

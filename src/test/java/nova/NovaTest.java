@@ -53,12 +53,14 @@ public class NovaTest {
 
     @Test
     public void getResponse_updateWhenStorageUnavailable_returnsSaveError() throws IOException {
-        Path blockedParent = tempDirectory.resolve("blocked");
-        Files.writeString(blockedParent, "Not a directory");
-        Nova nova = new Nova(blockedParent.resolve("nova.txt").toString());
+        Path storageParent = tempDirectory.resolve("data");
+        Path storagePath = storageParent.resolve("nova.txt");
+        Nova nova = new Nova(storagePath.toString());
         nova.getResponse("todo original");
+        blockStoragePath(storagePath);
 
         assertEquals("Unable to save tasks.", nova.getResponse("update 1 revised"));
+        assertEquals("1.[T][ ] original", nova.getResponse("list"));
     }
 
     @Test
@@ -99,6 +101,26 @@ public class NovaTest {
                 nova.getResponse("deadline return book /by 2026-09-10 1800"));
         assertEquals("Unable to save tasks.",
                 nova.getResponse("event meeting /from 2pm /to 4pm"));
+        assertEquals("", nova.getResponse("list"));
+    }
+
+    @Test
+    public void getResponse_mutationWhenStorageUnavailable_preservesTaskList()
+            throws IOException {
+        Path storageParent = tempDirectory.resolve("data");
+        Path storagePath = storageParent.resolve("nova.txt");
+        Nova nova = new Nova(storagePath.toString());
+        nova.getResponse("todo read book");
+        nova.getResponse("todo write report");
+        String originalList = nova.getResponse("list");
+        blockStoragePath(storagePath);
+
+        assertEquals("Unable to save tasks.", nova.getResponse("mark 1"));
+        assertEquals(originalList, nova.getResponse("list"));
+        assertEquals("Unable to save tasks.", nova.getResponse("delete 1"));
+        assertEquals(originalList, nova.getResponse("list"));
+        assertEquals("Unable to save tasks.", nova.getResponse("update 1 revised"));
+        assertEquals(originalList, nova.getResponse("list"));
     }
 
     @Test
@@ -169,5 +191,27 @@ public class NovaTest {
         Nova reloadedNova = new Nova(storagePath.toString());
 
         assertTrue(reloadedNova.getResponse("list").contains("return book"));
+    }
+
+    @Test
+    public void getWelcomeMessage_corruptedStorage_warnsAndLoadsValidTasks()
+            throws IOException {
+        Path storagePath = tempDirectory.resolve("nova.txt");
+        Files.write(storagePath, List.of(
+                "TODO\t0\tread book\t",
+                "invalid stored task"));
+
+        Nova nova = new Nova(storagePath.toString());
+
+        assertTrue(nova.getWelcomeMessage().startsWith(
+                "Some saved tasks were invalid and could not be loaded."));
+        assertEquals("1.[T][ ] read book", nova.getResponse("list"));
+    }
+
+    private void blockStoragePath(Path storagePath) throws IOException {
+        Path storageParent = storagePath.getParent();
+        Files.delete(storagePath);
+        Files.delete(storageParent);
+        Files.writeString(storageParent, "This file blocks the storage directory.");
     }
 }

@@ -150,4 +150,69 @@ public class ParserTest {
                 command.getType()
         );
     }
+
+    @Test
+    public void parse_surroundingAndRepeatedWhitespace_parsesCommands() {
+        Parser.ParsedCommand todo = Parser.parse("  todo    read book   ");
+        Parser.ParsedCommand deadline = Parser.parse(
+                "deadline return book   /by   2026-09-18 2100");
+        Parser.ParsedCommand event = Parser.parse(
+                "event consultation   /from   2pm   /to   4pm");
+
+        assertEquals("read book", todo.getDescription());
+        assertEquals("return book", deadline.getDescription());
+        assertEquals(LocalDateTime.of(2026, 9, 18, 21, 0), deadline.getDeadline());
+        assertEquals("consultation", event.getDescription());
+        assertEquals("2pm", event.getFrom());
+        assertEquals("4pm", event.getTo());
+    }
+
+    @Test
+    public void parse_missingArguments_returnsCommandSpecificErrors() {
+        String[][] invalidInputs = {
+            {"mark", "Please use: mark NUMBER"},
+            {"delete", "Please use: delete NUMBER"},
+            {"deadline", "Please use: deadline DESCRIPTION /by yyyy-MM-dd HHmm"},
+            {"event", "Please provide both /from and /to."},
+            {"find", "Please provide a keyword to find."}
+        };
+
+        for (String[] invalidInput : invalidInputs) {
+            IllegalArgumentException error = assertInvalidInput(invalidInput[0]);
+            assertEquals(invalidInput[1], error.getMessage());
+        }
+    }
+
+    @Test
+    public void parse_invalidCalendarDate_returnsDateError() {
+        String invalidDeadline = "deadline invalid date /by 2026-02-30 1800";
+        IllegalArgumentException error = assertInvalidInput(invalidDeadline);
+
+        assertEquals("Please enter the deadline as yyyy-MM-dd HHmm.", error.getMessage());
+    }
+
+    @Test
+    public void parse_blankEventFields_returnsEventError() {
+        String[] invalidInputs = {
+            "event /from 2pm /to 4pm",
+            "event consultation /from /to 4pm",
+            "event consultation /from 2pm /to"
+        };
+
+        for (String invalidInput : invalidInputs) {
+            IllegalArgumentException error = assertInvalidInput(invalidInput);
+            assertEquals("Please provide both /from and /to.", error.getMessage());
+        }
+    }
+
+    @Test
+    public void parse_storageBreakingDescription_returnsDescriptionError() {
+        IllegalArgumentException error = assertInvalidInput("todo first line\nsecond line");
+
+        assertEquals("Descriptions cannot contain tabs or line breaks.", error.getMessage());
+    }
+
+    private static IllegalArgumentException assertInvalidInput(String input) {
+        return assertThrows(IllegalArgumentException.class, () -> Parser.parse(input));
+    }
 }

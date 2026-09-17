@@ -102,6 +102,28 @@ public class TaskList {
     }
 
     /**
+     * Returns an independent copy of this task list.
+     *
+     * @return Copy containing the same task data.
+     */
+    public TaskList copy() {
+        List<Task> copiedTasks = tasks.stream()
+                .map(task -> Task.fromStorageString(task.toStorageString()))
+                .collect(Collectors.toCollection(ArrayList::new));
+        return new TaskList(copiedTasks);
+    }
+
+    /**
+     * Replaces all tasks with those in the specified list.
+     *
+     * @param replacement Replacement task list.
+     */
+    public void replaceWith(TaskList replacement) {
+        tasks.clear();
+        tasks.addAll(replacement.tasks);
+    }
+
+    /**
      * Finds tasks whose descriptions contain the specified keyword.
      *
      * @param keyword Keyword to search for.

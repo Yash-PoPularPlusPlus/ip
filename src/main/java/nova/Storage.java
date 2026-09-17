@@ -13,6 +13,7 @@ import java.util.List;
 public class Storage {
 
     private final Path filePath;
+    private boolean hasCorruptedEntries;
 
     /**
      * Creates storage using the specified file.
@@ -30,6 +31,7 @@ public class Storage {
      * @throws IOException If the storage file cannot be accessed.
      */
     public TaskList load() throws IOException {
+        hasCorruptedEntries = false;
         createParentDirectory();
 
         if (!Files.exists(filePath)) {
@@ -48,11 +50,20 @@ public class Storage {
             try {
                 tasks.add(Task.fromStorageString(line));
             } catch (RuntimeException ignored) {
-                // Ignore corrupted entries.
+                hasCorruptedEntries = true;
             }
         }
 
         return new TaskList(tasks);
+    }
+
+    /**
+     * Returns whether corrupted entries were skipped during the most recent load.
+     *
+     * @return True if at least one corrupted entry was skipped.
+     */
+    public boolean hasCorruptedEntries() {
+        return hasCorruptedEntries;
     }
 
     /**
