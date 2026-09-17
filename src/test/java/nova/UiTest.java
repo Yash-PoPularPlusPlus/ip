@@ -10,7 +10,8 @@ public class UiTest {
 
     @Test
     public void formatTaskList_emptyAndPopulatedLists_formatsOneBasedNumbers() {
-        assertEquals("", Ui.formatTaskList(new TaskList()));
+        assertEquals("Your orbit is clear. There are no tasks yet.",
+                Ui.formatTaskList(new TaskList()));
 
         TaskList tasks = new TaskList(List.of(
                 Task.todo("read book"),
@@ -24,7 +25,7 @@ public class UiTest {
 
     @Test
     public void formatMatchingTasks_emptyAndPopulatedLists_formatsHeaderAndNumbers() {
-        String header = "Here are the matching tasks in your list:";
+        String header = "Scan complete. Here are the matching tasks:";
         assertEquals(header, Ui.formatMatchingTasks(List.of()));
 
         String expected = String.join(System.lineSeparator(),
@@ -40,17 +41,17 @@ public class UiTest {
         Task task = Task.todo("read book");
 
         assertEquals(String.join(System.lineSeparator(),
-                "Got it. I've added this task:",
+                "Task added to your orbit:",
                 "[T][ ] read book",
-                "Now you have 2 tasks in the list."),
+                "You now have 2 tasks in orbit."),
                 Ui.formatAddedTask(task, 2));
         assertEquals(String.join(System.lineSeparator(),
-                "Noted. I've removed this task:",
+                "Task cleared from your orbit:",
                 "[T][ ] read book",
-                "Now you have 1 tasks in the list."),
+                "You now have 1 task in orbit."),
                 Ui.formatDeletedTask(task, 1));
         assertEquals(String.join(System.lineSeparator(),
-                "Got it. I've updated this task:",
+                "Course corrected! I've updated this task:",
                 "[T][ ] read book"),
                 Ui.formatUpdatedTask(task));
     }
@@ -58,11 +59,13 @@ public class UiTest {
     @Test
     public void formatFixedMessages_returnsExpectedText() {
         assertEquals(String.join(System.lineSeparator(),
-                "Hello! I'm Nova.",
-                "What can I do for you?"), Ui.formatWelcomeMessage());
-        assertEquals("Nice! I've marked this task as done.",
+                "Nova online! Your tasks are ready for launch.",
+                "What shall we accomplish today?"), Ui.formatWelcomeMessage());
+        assertEquals("Mission accomplished! I've marked this task as done.",
                 Ui.formatMarkedMessage());
-        assertEquals("Bye. Hope to see you again soon!",
+        assertEquals("That command is outside my orbit. Please try another one.",
+                Ui.formatUnknownCommand());
+        assertEquals("Nova signing off. Keep reaching for the stars!",
                 Ui.formatByeMessage());
     }
 }

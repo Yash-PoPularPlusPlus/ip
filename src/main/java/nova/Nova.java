@@ -96,7 +96,7 @@ public class Nova {
         try {
             Parser.ParsedCommand command = Parser.parse(input);
             if (command.getType() == Parser.CommandType.UNKNOWN) {
-                return new Response("Sorry, I don't understand that command.", true);
+                return new Response(Ui.formatUnknownCommand(), true);
             }
             return new Response(executeCommand(command), false);
         } catch (IllegalArgumentException e) {
@@ -141,7 +141,7 @@ public class Nova {
                 List<Task> matches = tasks.find(command.getDescription());
                 return Ui.formatMatchingTasks(matches);
             case UNKNOWN:
-                return "Sorry, I don't understand that command.";
+                return Ui.formatUnknownCommand();
             default:
                 return "";
         }

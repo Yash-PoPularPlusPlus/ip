@@ -33,8 +33,8 @@ public class Ui {
      */
     public static String formatWelcomeMessage() {
         return joinLines(
-                "Hello! I'm Nova.",
-                "What can I do for you?");
+                "Nova online! Your tasks are ready for launch.",
+                "What shall we accomplish today?");
     }
 
     /**
@@ -44,6 +44,10 @@ public class Ui {
      * @return Formatted task list.
      */
     public static String formatTaskList(TaskList tasks) {
+        if (tasks.size() == 0) {
+            return "Your orbit is clear. There are no tasks yet.";
+        }
+
         StringBuilder response = new StringBuilder();
         for (int i = 1; i <= tasks.size(); i++) {
             if (i > 1) {
@@ -64,7 +68,7 @@ public class Ui {
      */
     public static String formatMatchingTasks(List<Task> tasks) {
         StringBuilder response = new StringBuilder(
-                "Here are the matching tasks in your list:");
+                "Scan complete. Here are the matching tasks:");
 
         for (int i = 0; i < tasks.size(); i++) {
             response.append(System.lineSeparator())
@@ -84,9 +88,9 @@ public class Ui {
      */
     public static String formatAddedTask(Task task, int taskCount) {
         return joinLines(
-                "Got it. I've added this task:",
+                "Task added to your orbit:",
                 task.toDisplayString(),
-                "Now you have " + taskCount + " tasks in the list.");
+                formatTaskCount(taskCount));
     }
 
     /**
@@ -98,9 +102,9 @@ public class Ui {
      */
     public static String formatDeletedTask(Task task, int taskCount) {
         return joinLines(
-                "Noted. I've removed this task:",
+                "Task cleared from your orbit:",
                 task.toDisplayString(),
-                "Now you have " + taskCount + " tasks in the list.");
+                formatTaskCount(taskCount));
     }
 
     /**
@@ -109,7 +113,7 @@ public class Ui {
      * @return Task-marked confirmation.
      */
     public static String formatMarkedMessage() {
-        return "Nice! I've marked this task as done.";
+        return "Mission accomplished! I've marked this task as done.";
     }
 
     /**
@@ -119,7 +123,17 @@ public class Ui {
      * @return Task-updated confirmation.
      */
     public static String formatUpdatedTask(Task task) {
-        return joinLines("Got it. I've updated this task:", task.toDisplayString());
+        return joinLines("Course corrected! I've updated this task:",
+                task.toDisplayString());
+    }
+
+    /**
+     * Formats the response for an unrecognised command.
+     *
+     * @return Unknown-command response.
+     */
+    public static String formatUnknownCommand() {
+        return "That command is outside my orbit. Please try another one.";
     }
 
     /**
@@ -139,7 +153,12 @@ public class Ui {
      * @return Farewell message.
      */
     public static String formatByeMessage() {
-        return "Bye. Hope to see you again soon!";
+        return "Nova signing off. Keep reaching for the stars!";
+    }
+
+    private static String formatTaskCount(int taskCount) {
+        String noun = taskCount == 1 ? "task" : "tasks";
+        return "You now have " + taskCount + " " + noun + " in orbit.";
     }
 
     private static String joinLines(String... lines) {

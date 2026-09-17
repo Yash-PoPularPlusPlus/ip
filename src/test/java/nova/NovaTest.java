@@ -27,13 +27,15 @@ public class NovaTest {
 
         String response = nova.getResponse("update 1 revised homework");
         String expectedStored = original.replace("original", "revised homework");
-        assertEquals(String.join(System.lineSeparator(), "Got it. I've updated this task:",
+        assertEquals(String.join(System.lineSeparator(),
+                "Course corrected! I've updated this task:",
                 Task.fromStorageString(expectedStored).toDisplayString()), response);
         assertEquals(List.of(expectedStored), Files.readAllLines(storagePath));
         Nova reloaded = new Nova(storagePath.toString());
         assertEquals(nova.getResponse("list"), reloaded.getResponse("list"));
         assertTrue(reloaded.getResponse("find homework").contains("revised homework"));
-        assertEquals("Here are the matching tasks in your list:", reloaded.getResponse("find original"));
+        assertEquals("Scan complete. Here are the matching tasks:",
+                reloaded.getResponse("find original"));
     }
 
     @Test
@@ -81,8 +83,9 @@ public class NovaTest {
         for (int i = 0; i < commands.length; i++) {
             int taskCount = i + 1;
             String expected = String.join(System.lineSeparator(),
-                    "Got it. I've added this task:", displays[i],
-                    "Now you have " + taskCount + " tasks in the list.");
+                    "Task added to your orbit:", displays[i],
+                    "You now have " + taskCount + " "
+                            + (taskCount == 1 ? "task" : "tasks") + " in orbit.");
             assertEquals(expected, nova.getResponse(commands[i]));
             assertEquals(taskCount, Files.readAllLines(storagePath).size());
             Nova reloadedNova = new Nova(storagePath.toString());
@@ -101,7 +104,8 @@ public class NovaTest {
                 nova.getResponse("deadline return book /by 2026-09-10 1800"));
         assertEquals("Unable to save tasks.",
                 nova.getResponse("event meeting /from 2pm /to 4pm"));
-        assertEquals("", nova.getResponse("list"));
+        assertEquals("Your orbit is clear. There are no tasks yet.",
+                nova.getResponse("list"));
     }
 
     @Test
@@ -141,7 +145,7 @@ public class NovaTest {
         Nova nova = new Nova(tempDirectory.resolve("nova.txt").toString());
 
         assertEquals(
-                "Sorry, I don't understand that command.",
+                "That command is outside my orbit. Please try another one.",
                 nova.getResponse("invalid")
         );
     }
@@ -159,7 +163,8 @@ public class NovaTest {
         assertTrue(unknownResponse.isError());
         assertTrue(validResponse.message().contains("read book"));
         assertEquals("Please provide a description for the todo.", invalidResponse.message());
-        assertEquals("Sorry, I don't understand that command.", unknownResponse.message());
+        assertEquals("That command is outside my orbit. Please try another one.",
+                unknownResponse.message());
     }
 
     @Test
@@ -169,7 +174,7 @@ public class NovaTest {
         nova.getResponse("event meeting /from 2pm /to 4pm");
 
         assertEquals(
-                "Nice! I've marked this task as done.",
+                "Mission accomplished! I've marked this task as done.",
                 nova.getResponse("mark 1")
         );
         assertTrue(nova.getResponse("list").contains("[T][X] read book"));
@@ -177,7 +182,7 @@ public class NovaTest {
         assertTrue(nova.getResponse("list").contains(
                 "[E][ ] meeting (from: 2pm to: 4pm)"));
         assertEquals(
-                "Bye. Hope to see you again soon!",
+                "Nova signing off. Keep reaching for the stars!",
                 nova.getResponse("bye")
         );
     }
