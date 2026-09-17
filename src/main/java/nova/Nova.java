@@ -34,6 +34,9 @@ public class Nova {
         String errorMessage = "";
         try {
             loadedTasks = storage.load();
+            if (storage.hasCorruptedEntries()) {
+                errorMessage = "Some saved tasks were invalid and could not be loaded.";
+            }
         } catch (IOException e) {
             errorMessage = "Unable to load saved tasks.";
             loadedTasks = new TaskList();
@@ -118,19 +121,13 @@ public class Nova {
             case LIST:
                 return Ui.formatTaskList(tasks);
             case MARK:
-                tasks.markDone(command.getTaskNumber());
-                storage.save(tasks);
-                return Ui.formatMarkedMessage();
+                return markTask(command.getTaskNumber());
             case DELETE:
-                Task removedTask = tasks.delete(command.getTaskNumber());
-                storage.save(tasks);
-                return Ui.formatDeletedTask(removedTask, tasks.size());
+                return deleteTask(command.getTaskNumber());
             case TODO:
                 return addTask(Task.todo(command.getDescription()));
             case UPDATE:
-                Task updatedTask = tasks.update(command.getTaskNumber(), command.getDescription());
-                storage.save(tasks);
-                return Ui.formatUpdatedTask(updatedTask);
+                return updateTask(command.getTaskNumber(), command.getDescription());
             case DEADLINE:
                 return addTask(Task.deadline(
                         command.getDescription(),
@@ -158,9 +155,36 @@ public class Nova {
      * @throws IOException If the updated task list cannot be saved.
      */
     private String addTask(Task task) throws IOException {
-        tasks.add(task);
-        storage.save(tasks);
-        return Ui.formatAddedTask(task, tasks.size());
+        TaskList updatedTasks = tasks.copy();
+        updatedTasks.add(task);
+        saveChanges(updatedTasks);
+        return Ui.formatAddedTask(task, updatedTasks.size());
+    }
+
+    private String markTask(int taskNumber) throws IOException {
+        TaskList updatedTasks = tasks.copy();
+        updatedTasks.markDone(taskNumber);
+        saveChanges(updatedTasks);
+        return Ui.formatMarkedMessage();
+    }
+
+    private String deleteTask(int taskNumber) throws IOException {
+        TaskList updatedTasks = tasks.copy();
+        Task removedTask = updatedTasks.delete(taskNumber);
+        saveChanges(updatedTasks);
+        return Ui.formatDeletedTask(removedTask, updatedTasks.size());
+    }
+
+    private String updateTask(int taskNumber, String description) throws IOException {
+        TaskList updatedTasks = tasks.copy();
+        Task updatedTask = updatedTasks.update(taskNumber, description);
+        saveChanges(updatedTasks);
+        return Ui.formatUpdatedTask(updatedTask);
+    }
+
+    private void saveChanges(TaskList updatedTasks) throws IOException {
+        storage.save(updatedTasks);
+        tasks.replaceWith(updatedTasks);
     }
 
     /**

@@ -3,6 +3,7 @@ package nova;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 /**
  * Parses user input into commands understood by Nova.
@@ -10,7 +11,8 @@ import java.time.format.DateTimeParseException;
 public class Parser {
 
     private static final DateTimeFormatter INPUT_DATE_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm")
+                    .withResolverStyle(ResolverStyle.STRICT);
 
     /**
      * Represents the command types supported by Nova.
@@ -39,67 +41,80 @@ public class Parser {
      * @throws IllegalArgumentException If the command arguments are invalid.
      */
     public static ParsedCommand parse(String input) {
-        if (input.equals("bye")) {
-            return new ParsedCommand(CommandType.BYE);
-        } else if (input.equals("list")) {
-            return new ParsedCommand(CommandType.LIST);
-        } else if (input.startsWith("mark ")) {
-            return ParsedCommand.withTaskNumber(
-                    CommandType.MARK,
-                    parseTaskNumber(input.substring(5)));
-        } else if (input.startsWith("delete ")) {
-            return ParsedCommand.withTaskNumber(
-                    CommandType.DELETE,
-                    parseTaskNumber(input.substring(7)));
-        } else if (input.trim().equals("update")) {
-            throw new IllegalArgumentException("Please use: update NUMBER DESCRIPTION");
-        } else if (input.startsWith("update ")) {
-            return parseUpdate(input.substring(7));
-        } else if (input.trim().equals("todo")) {
-            throw new IllegalArgumentException(
-                    "Please provide a description for the todo.");
-        } else if (input.startsWith("todo ")) {
-            return ParsedCommand.withDescription(
-                    CommandType.TODO,
-                    input.substring(5));
-        } else if (input.startsWith("deadline ")) {
-            return parseDeadline(input.substring(9));
-        } else if (input.startsWith("event ")) {
-            return parseEvent(input.substring(6));
-        } else if (input.trim().equals("find")) {
-            throw new IllegalArgumentException(
-                    "Please provide a keyword to find.");
-        } else if (input.startsWith("find ")) {
-            return ParsedCommand.withDescription(
-                    CommandType.FIND,
-                    input.substring(5));
+        if (input == null || input.isBlank()) {
+            return new ParsedCommand(CommandType.UNKNOWN);
         }
 
-        return new ParsedCommand(CommandType.UNKNOWN);
+        String[] commandParts = input.strip().split("\\s+", 2);
+        String commandWord = commandParts[0];
+        String arguments = commandParts.length == 2 ? commandParts[1].strip() : "";
+
+        switch (commandWord) {
+            case "bye":
+                ensureNoArguments(arguments, "Please use: bye");
+                return new ParsedCommand(CommandType.BYE);
+            case "list":
+                ensureNoArguments(arguments, "Please use: list");
+                return new ParsedCommand(CommandType.LIST);
+            case "mark":
+                return ParsedCommand.withTaskNumber(
+                        CommandType.MARK,
+                        parseTaskNumber(requireArguments(arguments, "Please use: mark NUMBER")));
+            case "delete":
+                return ParsedCommand.withTaskNumber(
+                        CommandType.DELETE,
+                        parseTaskNumber(requireArguments(arguments, "Please use: delete NUMBER")));
+            case "update":
+                return parseUpdate(requireArguments(
+                        arguments, "Please use: update NUMBER DESCRIPTION"));
+            case "todo":
+                return ParsedCommand.withDescription(
+                        CommandType.TODO,
+                        parseDescription(arguments, "Please provide a description for the todo."));
+            case "deadline":
+                return parseDeadline(requireArguments(
+                        arguments,
+                        "Please use: deadline DESCRIPTION /by yyyy-MM-dd HHmm"));
+            case "event":
+                return parseEvent(requireArguments(
+                        arguments, "Please provide both /from and /to."));
+            case "find":
+                return ParsedCommand.withDescription(
+                        CommandType.FIND,
+                        parseDescription(arguments, "Please provide a keyword to find."));
+            default:
+                return new ParsedCommand(CommandType.UNKNOWN);
+        }
     }
 
     private static ParsedCommand parseUpdate(String content) {
-        String[] parts = content.strip().split(" +", 2);
+        String[] parts = content.strip().split("\\s+", 2);
         if (parts.length != 2) {
             throw new IllegalArgumentException("Please use: update NUMBER DESCRIPTION");
         }
-        return ParsedCommand.withUpdate(parseTaskNumber(parts[0]), parts[1]);
+        return ParsedCommand.withUpdate(
+                parseTaskNumber(parts[0]),
+                parseSingleLineText(
+                        parts[1], "The description cannot contain tabs or line breaks."));
     }
 
     private static ParsedCommand parseDeadline(String content) {
-        String[] parts = content.split(" /by ", 2);
+        String[] parts = content.split("\\s+/by\\s+", -1);
 
-        if (parts.length != 2) {
+        if (parts.length != 2 || parts[0].isBlank() || parts[1].isBlank()) {
             throw new IllegalArgumentException(
                     "Please use: deadline DESCRIPTION /by yyyy-MM-dd HHmm");
         }
 
         try {
             LocalDateTime deadline = LocalDateTime.parse(
-                    parts[1],
+                    parts[1].strip(),
                     INPUT_DATE_FORMAT);
 
-            return ParsedCommand.withDeadline(parts[0], deadline);
+            return ParsedCommand.withDeadline(
+                    parseDescription(
+                            parts[0], "Please provide a description for the deadline."),
+                    deadline);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException(
                     "Please enter the deadline as yyyy-MM-dd HHmm.");
@@ -107,33 +122,69 @@ public class Parser {
     }
 
     private static ParsedCommand parseEvent(String content) {
-        String[] fromParts = content.split(" /from ", 2);
+        String[] fromParts = content.split("\\s+/from\\s+", -1);
 
         if (fromParts.length != 2) {
             throw new IllegalArgumentException(
                     "Please provide both /from and /to.");
         }
 
-        String[] toParts = fromParts[1].split(" /to ", 2);
+        String[] toParts = fromParts[1].split("\\s+/to\\s+", -1);
 
-        if (toParts.length != 2) {
+        if (toParts.length != 2
+                || fromParts[0].isBlank()
+                || toParts[0].isBlank()
+                || toParts[1].isBlank()) {
             throw new IllegalArgumentException(
                     "Please provide both /from and /to.");
         }
 
         return ParsedCommand.withEvent(
-                fromParts[0],
-                toParts[0],
-                toParts[1]);
+                parseDescription(
+                        fromParts[0], "Please provide a description for the event."),
+                parseSingleLineText(toParts[0], "Event times must be on one line."),
+                parseSingleLineText(toParts[1], "Event times must be on one line."));
     }
 
     private static int parseTaskNumber(String numberText) {
         try {
-            return Integer.parseInt(numberText);
+            int taskNumber = Integer.parseInt(numberText.strip());
+            if (taskNumber < 1) {
+                throw new NumberFormatException();
+            }
+            return taskNumber;
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException(
                     "That task number does not exist.");
         }
+    }
+
+    private static String requireArguments(String arguments, String message) {
+        if (arguments.isBlank()) {
+            throw new IllegalArgumentException(message);
+        }
+        return arguments;
+    }
+
+    private static void ensureNoArguments(String arguments, String message) {
+        if (!arguments.isEmpty()) {
+            throw new IllegalArgumentException(message);
+        }
+    }
+
+    private static String parseDescription(String description, String blankMessage) {
+        if (description.isBlank()) {
+            throw new IllegalArgumentException(blankMessage);
+        }
+        return parseSingleLineText(
+                description, "Descriptions cannot contain tabs or line breaks.");
+    }
+
+    private static String parseSingleLineText(String text, String message) {
+        if (text.contains("\t") || text.contains("\n") || text.contains("\r")) {
+            throw new IllegalArgumentException(message);
+        }
+        return text.strip();
     }
 
     /**
